@@ -1,3 +1,5 @@
+import  { memo } from "react";
+
 type SparklineProps = {
   prices: number[];
   isGreen: boolean;
@@ -5,7 +7,7 @@ type SparklineProps = {
   height?: number;
 };
 
-export function Sparkline({ 
+function Sparkline({ 
   prices, 
   isGreen, 
   width = 80, 
@@ -52,3 +54,4 @@ export function Sparkline({
     </svg>
   );
 }
+export default memo(Sparkline);

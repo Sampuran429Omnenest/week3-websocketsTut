@@ -1,19 +1,22 @@
-import { useEffect, useRef, useState } from "react";
-import type { Stock } from "../types/types";
-import { Sparkline } from "./Sparkline";
+import { memo, useEffect, useRef, useState } from "react";
+import type { NormalizedStock } from "../domains/market/types";
+import  Sparkline from "./Sparkline";
 import { formatPrice, formatPercent, formatChange,
          formatVolume, getColor, getBgColor } from "../helpers/helpers";
+import { useStaleness } from "../shared/hooks/useStaleness";
  
 type StockRowProps = {
-  stock:      Stock;
+  stock:      NormalizedStock;
   history:    number[];
   isSelected: boolean;
   onClick:    () => void;
 };
  
-export function StockRow({ stock, history, isSelected, onClick }: StockRowProps) {
+function StockRow({ stock, history, isSelected, onClick }: StockRowProps) {
   const prevPrice       = useRef<number>(stock.price);
   const [flash, setFlash] = useState<string>("");
+  const isStale=useStaleness(stock.receivedAt);
+
  
   useEffect(() => {
     if (stock.price === prevPrice.current) return;
@@ -35,6 +38,8 @@ export function StockRow({ stock, history, isSelected, onClick }: StockRowProps)
         cursor:          "pointer",
         borderBottom:    "1px solid #161B22",
         backgroundColor: isSelected ? "rgba(255, 184, 0, 0.07)" : "transparent",
+        opacity : isStale ? 0.45 : 1.0,
+        transition : "opacity 0.3s ease",
       }}
     >
       {/* Symbol + sector */}
@@ -53,6 +58,11 @@ export function StockRow({ stock, history, isSelected, onClick }: StockRowProps)
                        fontSize: "14px", color: "#E6EDF3" }}>
           {formatPrice(stock.price)}
         </span>
+        {isStale && (
+          <div style={{ fontSize: "9px", color: "#484F58", marginTop: "2px" }}>
+            STALE
+          </div>
+        )}
       </td>
  
       {/* Change % */}
@@ -89,6 +99,4 @@ export function StockRow({ stock, history, isSelected, onClick }: StockRowProps)
     </tr>
   );
 }
-
-
-
+export default memo(StockRow);

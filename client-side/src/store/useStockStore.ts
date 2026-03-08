@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { Stock } from "../types/types"
+import type { NormalizedStock } from "../domains/market/types";
 
 export type EventKind="connect" | "disconnect" | "price" | "ping" | "error";
 export type EventLogEntry={
@@ -9,15 +9,17 @@ export type EventLogEntry={
     time:string;
 }
 type StockStoreState={
-    stocks:Record<string,Stock>;
+    stocks:Record<string,NormalizedStock>;
     isConnected:boolean;
     selectedSymbol:string|null;
     priceHistory:Record<string,number[]>;
     tickCount: number;
+    latencyMs:number|null;
     eventLog:EventLogEntry[];
-    setStock:(stock:Stock)=>void;
+    setStock:(stock:NormalizedStock)=>void;
     setConnected:(value:boolean)=>void;
     setSelected:(symbol:string|null)=>void;
+    setLatency:(ms:number)=>void;
     addEvent: (msg:string,kind:EventKind)=>void
 }
 let eventIdCounter=0;
@@ -27,8 +29,9 @@ export const useStockStore=create<StockStoreState>((set)=>({
     selectedSymbol:null,
     priceHistory:{},
     tickCount:0,
+    latencyMs:null,
     eventLog:[],
-    setStock:(stock:Stock)=>{
+    setStock:(stock:NormalizedStock)=>{
         set((state)=>{
             const oldHistory=state.priceHistory[stock.symbol]||[];
             const newHistory=[...oldHistory,stock.price].slice(-30);
@@ -61,5 +64,6 @@ export const useStockStore=create<StockStoreState>((set)=>({
         set(()=>({
             selectedSymbol:symbol,
         }))
-    }
+    },
+    setLatency: (ms: number) => set({ latencyMs: ms }),
 }));

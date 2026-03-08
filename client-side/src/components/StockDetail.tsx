@@ -1,10 +1,10 @@
-import type { Stock } from "../types/types";
-import { Sparkline } from "./Sparkline";
+import  Sparkline  from "./Sparkline";
 import { formatPrice, formatPercent, formatChange,
          formatVolume, getColor, getBgColor } from "../helpers/helpers";
+import type { NormalizedStock } from "../domains/market/types";
  
 type StockDetailProps = {
-  stock:   Stock | null;
+  stock:   NormalizedStock | null;
   history: number[];
   onClose: () => void;
 };

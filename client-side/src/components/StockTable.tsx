@@ -1,8 +1,9 @@
-import type { Stock } from "../types/types";
-import { StockRow } from "./StockRow";
+import StockRow from "./StockRow";
 import { useStockStore } from "../store/useStockStore"; 
+import type { NormalizedStock } from "../domains/market/types";
+import { useCallback } from "react";
 type StockTableProps = {
-  stocks:   Stock[];
+  stocks:   NormalizedStock[];
   history:  Record<string, number[]>;
   sortBy:   string;
   sortDir:  "asc" | "desc";
@@ -20,6 +21,13 @@ const COLUMNS = [
  
 export function StockTable({ stocks, history, sortBy, sortDir, onSort }: StockTableProps) {
   const { selectedSymbol, setSelected } = useStockStore();
+  const handleRowClick = useCallback(
+  (symbol: string) => setSelected(symbol),
+  [setSelected]
+  // ↑ only recreate if setSelected changes
+  // (it never does — Zustand actions are stable)
+);
+
  
   return (
     <div style={{ flex: 1, overflowY: "auto" }}>
@@ -63,7 +71,8 @@ export function StockTable({ stocks, history, sortBy, sortDir, onSort }: StockTa
               history={history[stock.symbol] || []}
               isSelected={selectedSymbol === stock.symbol}
               onClick={() => {
-                setSelected(selectedSymbol === stock.symbol ? null : stock.symbol);
+                handleRowClick(stock.symbol)
+                // setSelected(selectedSymbol === stock.symbol ? null : stock.symbol);
               }}
             />
           ))}

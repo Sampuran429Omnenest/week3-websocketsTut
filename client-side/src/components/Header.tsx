@@ -1,9 +1,20 @@
+import  { memo } from "react";
+import { useMarketStore } from "../store/market.store";
+
 type HeaderProps = {
   isConnected: boolean;
-  tickCount:number;
 };
- 
-export function Header({ isConnected, tickCount }: HeaderProps) {
+
+function Header({ isConnected }: HeaderProps) {
+  // 1. Get latency from the store
+  const latencyMs = useMarketStore(s => s.latencyMs);
+
+  // 2. Define the dynamic color logic
+  const latColor = latencyMs === null ? "#484F58"
+    : latencyMs < 50  ? "#00C87C"  // Green
+    : latencyMs < 150 ? "#FFB800"  // Gold
+    : "#FF4D4D";                   // Red
+
   return (
     <div style={{
       display:         "flex",
@@ -15,6 +26,7 @@ export function Header({ isConnected, tickCount }: HeaderProps) {
       borderBottom:    "1px solid #21262D",
     }}>
  
+      {/* Left Side: Logo */}
       <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
         <span style={{ fontSize: "22px", fontWeight: "bold", color: "#00C87C" }}>
           groww
@@ -24,36 +36,38 @@ export function Header({ isConnected, tickCount }: HeaderProps) {
         </span>
       </div>
 
- 
-      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-        <div style={{
-          width:           "8px",
-          height:          "8px",
-          borderRadius:    "50%",
-          backgroundColor: isConnected ? "#00C87C" : "#FF4D4D",
-        }} />
-        <span style={{
-          fontSize:   "11px",
-          fontFamily: "monospace",
-          color:      isConnected ? "#00C87C" : "#FF4D4D",
-        }}>
-          {isConnected ? "LIVE" : "OFFLINE"}
-
-                  {tickCount > 0 && (
-          <span style={{
-            fontSize:        "10px",
-            fontFamily:      "monospace",
-            color:           "#484F58",
-            marginRight:     "8px",
+      {/* Right Side: Status & Latency */}
+      <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+        
+        {/* Latency Display (only if connected) */}
+        {isConnected && latencyMs !== null && (
+          <span style={{ 
+            fontFamily: "monospace", 
+            fontSize: "11px", 
+            color: latColor 
           }}>
-            {tickCount.toLocaleString()} updates
+            {latencyMs}ms
           </span>
         )}
 
-        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+          <div style={{
+            width:           "8px",
+            height:          "8px",
+            borderRadius:    "50%",
+            backgroundColor: isConnected ? "#00C87C" : "#FF4D4D",
+          }} />
+          <span style={{
+            fontSize:   "11px",
+            fontFamily: "monospace",
+            color:      isConnected ? "#00C87C" : "#FF4D4D",
+          }}>
+            {isConnected ? "LIVE" : "OFFLINE"}
+          </span>
+        </div>
 
       </div>
- 
     </div>
   );
 }
+export default memo(Header);
